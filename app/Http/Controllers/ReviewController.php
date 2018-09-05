@@ -4,7 +4,10 @@ namespace AmazonReviewSuckerClassifierTool\Http\Controllers;
 
 use AmazonReviewSuckerClassifierTool\Jobs\AmazonFetchingData;
 use AmazonReviewSuckerClassifierTool\Review;
+use AmazonReviewSuckerClassifierTool\Report;
 use Illuminate\Http\Request;
+
+use Session;
 
 class ReviewController extends Controller
 {
@@ -18,6 +21,36 @@ class ReviewController extends Controller
 	{
         //
     }
+
+    /**
+     * Show form for request crawl reviews.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return view
+     */
+    public function requestPage(Request $request)
+    {
+    	return view('request');
+
+    }
+
+    /**
+     * Show all reviews by asin.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return view
+     */
+    public function resultPage(Request $request, $report_id)
+    {
+        $data = array(
+            'report' => Report::find($report_id),
+            'reviews' => Review::where('report_id', $report_id)->get(),
+            'message' => Session::get('message')
+        );
+    	return view('result')
+            ->with($data);
+
+    }
     
     /**
      * Get all reviews by asin in storage.
@@ -27,9 +60,11 @@ class ReviewController extends Controller
      */
     public function getAllReview(Request $request)
     {
-        $asin = $request->asin;
+        $report_id = $request->report_id;
+        $isReportDone = Report::find($report_id);
+        dd($isReportDone);
         try {
-            $review = Review::where('asin', $asin)->get();
+            $review = Review::where('report_id', $report_id)->get();
             if (!$review->isEmpty()) {
                 return response()->json([
                     'status' => http_response_code(),
@@ -174,25 +209,8 @@ class ReviewController extends Controller
     public function scrapeReviewFromAmazon(Request $request)
     {
         $asin = $request->asin;
-        dispatch((new AmazonFetchingData($asin)));
-        // dispatch((new AmazonFetchingData($asin))->delay(60 * 5));
-        try {
-            $review = Review::where('asin', $asin)->get();
-            if (!$review->isEmpty()) {
-                return response()->json([
-                    'status' => http_response_code(),
-                    'message' => 'Success',
-                    'data'	=> $review
-                ], 200);
-            } else {
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'Review not found',
-                    'data'		=> ""
-                ], 404);
-            }
-        } catch (\Expection $e) {
-    		return response()->json(['message' => $e->getMessage()]);
-    	}
+        $report = Report::create($request->all());
+        dispatch((new AmazonFetchingData($report->id, $asin))->delay(5));
+        return redirect()->route('review.result', $report->id)->with('message', 'Your report is being generated. You can bookmark this page and return to it later.');;
     }
 }

@@ -15,6 +15,7 @@ class CreateReviewsTable extends Migration
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->increments('id');
+            $table->uuid('report_id');
             $table->string('asin');
             $table->string('title');
             $table->string('title_link');
@@ -28,6 +29,7 @@ class CreateReviewsTable extends Migration
             $table->boolean('child_product')->default(false);
             $table->boolean('child_asin')->nullable();
             $table->timestamps();
+            $table->foreign('report_id')->references('id')->on('reports');
         });
     }
 
