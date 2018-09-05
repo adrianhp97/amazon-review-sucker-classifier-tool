@@ -14,3 +14,9 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::prefix('review')->group(function() {
+    Route::get('', 'ReviewController@requestPage')->name('review.request');
+    Route::get('/report/{report_id}', 'ReviewController@resultPage')->name('review.result');
+    Route::post('', 'ReviewController@scrapeReviewFromAmazon')->name('review.scrape');
+});
