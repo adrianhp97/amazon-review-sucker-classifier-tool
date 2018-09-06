@@ -7,6 +7,7 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Amazon Review</title>
   <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="{{ asset('css/main.css') }}">
 </head>
 <body>
   <div class="container-fluid">

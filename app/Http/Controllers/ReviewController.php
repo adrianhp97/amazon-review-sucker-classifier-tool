@@ -8,6 +8,7 @@ use AmazonReviewSuckerClassifierTool\Report;
 use Illuminate\Http\Request;
 
 use Session;
+use Validator;
 
 class ReviewController extends Controller
 {
@@ -44,7 +45,8 @@ class ReviewController extends Controller
     {
         $data = array(
             'report' => Report::find($report_id),
-            'reviews' => Review::where('report_id', $report_id)->get(),
+            'reviews' => Review::where('report_id', $report_id)->paginate(10),
+            'totalReviews' => Review::where('report_id', $report_id)->count(),
             'message' => Session::get('message')
         );
     	return view('result')
@@ -208,6 +210,16 @@ class ReviewController extends Controller
      */
     public function scrapeReviewFromAmazon(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'asin' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('review.request')
+                        ->withErrors($validator)
+                        ->withInput();
+        }
+
         $asin = $request->asin;
         $report = Report::create($request->all());
         dispatch((new AmazonFetchingData($report->id, $asin))->delay(5));

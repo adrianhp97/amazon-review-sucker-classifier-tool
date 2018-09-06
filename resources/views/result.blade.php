@@ -9,16 +9,26 @@
     @if (!empty($message))
       <div class="alert alert-success" role="alert">{{ $message }}</div>
     @endif
-    <table>
-        <tr>
-          <td>Report Id</td>
-          <td>{{ $report->id }}</td>
-        </tr>
-        <tr>
-          <td>Asin</td>
-          <td>{{ $report->asin }}</td>
-        </tr>
-    </table>
+    <div id="report-information" class="well-s">
+      <div class="row">
+        <div class="col-sm-4 font-weight-bold">Report Id</div>
+        <div class="col-sm-8">{{ $report->id }}</div>
+      </div>
+      <div class="row">
+        <div class="col-sm-4 font-weight-bold">Asin</div>
+        <div class="col-sm-8">{{ $report->asin }}</div>
+      </div>
+      <div class="row">
+        <div class="col-sm-4 font-weight-bold">Request Date/Time</div>
+        <div class="col-sm-8">{{ $report->created_at }}</div>
+      </div>
+      <div class="row">
+        <div class="col-sm-4 font-weight-bold">Scrape Date/Time End</div>
+        <div class="col-sm-8">{{ $report->updated_at }}</div>
+      </div>
+    </div>
+    <br>
+    <h3>Result</h3>
     @if ($report->done)
       @if (count($reviews) > 0)
         @foreach ($reviews as $review)
@@ -82,6 +92,8 @@
             </table>
           </div>
         @endforeach
+        <span class="page-showing">Showing {{$reviews->firstItem()}} to {{$reviews->lastItem()}} of {{$totalReviews}}</span>
+        <nav>{{ $reviews->links() }}</nav>
       @else
         <div>No review.</div>
       @endif

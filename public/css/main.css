@@ -1,0 +1,28 @@
+html, body, .container-fluid, .content-wrapper {
+  height: 100%;
+}
+
+.content-wrapper {
+  padding: 15px 0;
+}
+
+.center-vertically {
+  height: 100%;
+}
+
+.content-wrapper .content-body form#scrape-form {
+  width: 300px;
+  margin:auto;
+}
+
+.content-wrapper .content-body #report-information {
+  width: 100%;
+  margin: auto;
+  padding: 30px 15px;
+  border-radius: 20px;
+  border: 1px solid black;
+}
+
+.content-wrapper .content-body #report-information .col-sm-4 {
+  max-width: 190px;
+}

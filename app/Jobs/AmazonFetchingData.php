@@ -99,15 +99,18 @@ class AmazonFetchingData implements ShouldQueue
                             'child_asin' => $child_asin
                         ];
                     }
+                    return [
+                        'error' => True
+                    ];
                 });
                 $counter++;
-                $reviews = array_merge($reviews, $reviews_page);
-                sleep(rand(3,10));
             } else {
                 $reviews_page = array(array(
                     'error' => True
                 ));
             }
+            $reviews = array_merge($reviews, $reviews_page);
+            sleep(rand(3,10));
         }
         return $reviews;
     }
