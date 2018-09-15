@@ -9,6 +9,7 @@
         "fabpot/goutte": "^3.2",
         "fideloper/proxy": "^4.0",
         "laravel/framework": "5.6.*",
+        "laravel/socialite": "^3.1",
         "laravel/tinker": "^1.0",
         "laravelcollective/html": "^5.4.0",
         "twbs/bootstrap": "^4.1",

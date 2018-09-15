@@ -11,12 +11,19 @@
 |
 */
 
+Auth::routes();
+
+Route::get('/redirect', 'SocialAuthFacebookController@redirect');
+Route::get('/callback', 'SocialAuthFacebookController@callback');
+
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::prefix('review')->group(function() {
     Route::get('', 'ReviewController@requestPage')->name('review.request');
     Route::get('/report/{report_id}', 'ReviewController@resultPage')->name('review.result');
     Route::post('', 'ReviewController@scrapeReviewFromAmazon')->name('review.scrape');
+    Route::put('/update-tags/{id}', 'ReviewController@updateTag')->name('review.tags.update');
+    Route::get('/tags/{tag}', 'ReviewController@tagsPage')->name('review.tags');
 });

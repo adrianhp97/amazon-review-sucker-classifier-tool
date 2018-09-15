@@ -25,6 +25,9 @@ class Report extends Model
 
     protected $fillable = [
         'asin',
+        'asin_variations',
+        'verified',
+        'unverified',
         'done',
     ];
 }

@@ -16,7 +16,10 @@ class CreateReportsTable extends Migration
         Schema::create('reports', function (Blueprint $table) {
             $table->uuid('id');
             $table->string('asin');
+            $table->string('asin_variations')->nullable();
             $table->boolean('done')->default(false);
+            $table->integer('verified')->default(0);
+            $table->integer('unverified')->default(0);
             $table->timestamps();
             $table->primary('id');
         });

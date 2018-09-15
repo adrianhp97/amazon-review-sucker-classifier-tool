@@ -19,7 +19,9 @@ class CreateReviewsTable extends Migration
             $table->string('asin');
             $table->string('title');
             $table->string('title_link');
+            $table->longText('desc');
             $table->integer('score');
+            $table->integer('vote');
             $table->date('date');
             $table->string('author');
             $table->string('author_link');
@@ -27,7 +29,8 @@ class CreateReviewsTable extends Migration
             $table->boolean('photos_or_video');
             $table->boolean('verified');
             $table->boolean('child_product')->default(false);
-            $table->boolean('child_asin')->nullable();
+            $table->string('child_asin')->nullable();
+            $table->longText('tags')->nullable();
             $table->timestamps();
             $table->foreign('report_id')->references('id')->on('reports');
         });

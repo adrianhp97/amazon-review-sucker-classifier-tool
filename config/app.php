@@ -146,6 +146,7 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
+        Laravel\Socialite\SocialiteServiceProvider::class,
 
         Collective\Html\HtmlServiceProvider::class,
 
@@ -210,6 +211,7 @@ return [
         'Schema' => Illuminate\Support\Facades\Schema::class,
         'Scrapper' => AmazonReviewSuckerClassifierTool\Providers\Scrapper\Scrapper::class,
         'Session' => Illuminate\Support\Facades\Session::class,
+        'Socialite' => Laravel\Socialite\Facades\Socialite::class,
         'Storage' => Illuminate\Support\Facades\Storage::class,
         'URL' => Illuminate\Support\Facades\URL::class,
         'Uuid' => Webpatser\Uuid\Uuid::class,

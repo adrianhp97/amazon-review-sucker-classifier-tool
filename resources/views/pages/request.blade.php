@@ -2,8 +2,8 @@
 
 @section('content')
 <div class="content-wrapper">
-  <div class="row content-body center-vertically">
-    {{ Form::open(array('route' => array('review.scrape'), 'method' => 'post', 'id' => 'scrape-form', 'class' => 'col-md-4')) }}
+  <div class="content-body display-center">
+    {{ Form::open(array('route' => array('review.scrape'), 'method' => 'post', 'id' => 'scrape-form', 'class' => 'col')) }}
       <div class="form-row">
         <div class="form-group col-md-12">
           {{ Form::label('asin', 'Asin') }}

@@ -15,12 +15,11 @@ class ReviewController extends Controller
     /**
      * Create a new controller instance.
      *
-     * @param  //still empty
      * @return void
      */
     public function __construct()
-	{
-        //
+    {
+        $this->middleware('auth');
     }
 
     /**
@@ -31,7 +30,7 @@ class ReviewController extends Controller
      */
     public function requestPage(Request $request)
     {
-    	return view('request');
+    	return view('pages.request');
 
     }
 
@@ -43,15 +42,112 @@ class ReviewController extends Controller
      */
     public function resultPage(Request $request, $report_id)
     {
-        $data = array(
-            'report' => Report::find($report_id),
-            'reviews' => Review::where('report_id', $report_id)->paginate(10),
-            'totalReviews' => Review::where('report_id', $report_id)->count(),
+        if (Report::find($report_id)) {
+            $perPage = request('perPage', 5);
+            $rat = array();
+            if (request('rt1', 'true') == 'true') {
+                array_push($rat, 1);
+            }
+            if (request('rt2', 'true') == 'true') {
+                array_push($rat, 2);
+            }
+            if (request('rt3', 'true') == 'true') {
+                array_push($rat, 3);
+            }
+            if (request('rt4', 'true') == 'true') {
+                array_push($rat, 4);
+            }
+            if (request('rt5', 'true') == 'true') {
+                array_push($rat, 5);
+            }
+            
+            $verified = request('verified', '');
+            $childAsin = request('child', '');
+
+            $report = Report::find($report_id);
+            $reviews = Review::where('report_id', $report_id)->get();
+            $reviewsAll = Review::where('report_id', $report_id);
+            $reviewsAll = $reviewsAll->whereIn('score', $rat);
+            if ($verified != '') {
+                $reviewsAll = $reviewsAll->where('verified', $verified);
+            }
+            $reviewsAll = $reviewsAll->where('child_asin', 'LIKE', '%' . $childAsin . '%');                     
+            $reviewsAll = $reviewsAll->paginate(10);
+            
+            $rating = array(0, 0, 0, 0, 0, 0);
+            $verified = array(0, 0, 0, 0, 0, 0);
+            $unverified = array(0, 0, 0, 0, 0, 0);
+            $totalRating = 0;
+            foreach($reviews as $review) {
+                if ($review->verified) {
+                    $verified[$review->score]++;
+                } else {
+                    $unverified[$review->score]++;
+                }
+                $rating[$review->score]++;
+                $totalRating += $review->score;
+            }
+            $totalReviews = Review::where('report_id', $report_id)->count();
+            $avg = $totalReviews != 0 ? round($totalRating/$totalReviews, 2) : 0;
+            $data = array(
+                'report' => $report,
+                'rating' => $rating,
+                'totalRating' => $totalRating,
+                'child_asin' => explode(",", $report->asin_variations),
+                'reviews' => $reviewsAll,
+                'verified' => $verified,
+                'unverified' => $unverified,
+                'avg' => $avg,
+                'message' => Session::get('message')
+            );
+            return view('pages.result')
+                ->with($data);
+        } else {
+            return redirect()->route('review.request')->with('alert', 'danger|' . trans('messages.token_invalid'));
+        }
+    }
+    
+    /**
+     * Show form for tags page.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return view
+     */
+    public function tagsPage(Request $request, $tag)
+    {
+    	$data = array(
+            'reviews' => Review::where('tags', 'LIKE', '%' . $tag . '%')->paginate(10),
+            'tag' => $tag,
             'message' => Session::get('message')
         );
-    	return view('result')
+        return view('pages.tags')
             ->with($data);
+    }
 
+    public function updateTag(Request $request, $id)
+    {
+        $data = $request->all();
+        try {
+            $review = Review::find($id);
+            foreach ($data as $key => $value) {
+                $review->$key = $value;
+            }
+            if ($review->save()) {
+                return response()->json([
+                    'status' => http_response_code(),
+                    'message' => 'Success',
+                    'data'	=> $review
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Review not found',
+                    'data'		=> ""
+                ], 404);
+            }
+        } catch (\Expection $e) {
+    		return response()->json(['message' => $e->getMessage()]);
+    	}
     }
     
     /**
@@ -64,7 +160,6 @@ class ReviewController extends Controller
     {
         $report_id = $request->report_id;
         $isReportDone = Report::find($report_id);
-        dd($isReportDone);
         try {
             $review = Review::where('report_id', $report_id)->get();
             if (!$review->isEmpty()) {
@@ -100,95 +195,6 @@ class ReviewController extends Controller
                     'status' => http_response_code(),
                     'message' => 'Success',
                     'data'	=> $review
-                ], 200);
-            } else {
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'Review not found',
-                    'data'		=> ""
-                ], 404);
-            }
-        } catch (\Expection $e) {
-    		return response()->json(['message' => $e->getMessage()]);
-    	}
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $data = $request->all();
-        try {
-            $newReview = Review::create($data);
-            return response()->json([
-				'status' => http_response_code(),
-                'message' => 'Success',
-				'data'	=> $newReview
-			], 200);
-        } catch (\Expection $e) {
-    		return response()->json(['message' => $e->getMessage()]);
-    	}
-    }
-    
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        $data = $request->all();
-        try {
-            $review = Review::find($id);
-            foreach ($data as $key => $value) {
-                $review->$key = $value;
-            }
-            if ($review->save()) {
-                return response()->json([
-                    'status' => http_response_code(),
-                    'message' => 'Success',
-                    'data'	=> $review
-                ], 200);
-            } else {
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'Review not found',
-                    'data'		=> ""
-                ], 404);
-            }
-        } catch (\Expection $e) {
-    		return response()->json(['message' => $e->getMessage()]);
-    	}
-    }
-
-    /**
-     * Remove the specified resource from storage by id or asin.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Request $request)
-    {
-        try {
-            if ($request->has('id')) {
-                $id = $request->id;
-                $data = array('id' => $id);
-            } else if ($request->has('asin')) {
-                $asin = $request->asin;
-                $data = array('asin' => $asin);
-            }
-            
-            if (Review::where('asin', $asin)->delete()) {
-                return response()->json([
-                    'status' => http_response_code(),
-                    'message' => 'Success',
-                    'data'	=> $data
                 ], 200);
             } else {
                 return response()->json([
